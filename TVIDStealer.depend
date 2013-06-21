@@ -2,7 +2,7 @@
 1371555382 source:c:\users\admin\workspace\tvidstealer\registry.c
 	"registry.h"
 
-1371558604 c:\users\admin\workspace\tvidstealer\registry.h
+1371817940 c:\users\admin\workspace\tvidstealer\registry.h
 	<stdio.h>
 	<stdlib.h>
 	<Windows.h>
@@ -12,7 +12,7 @@
 	"tvidstealer.h"
 	"registry.h"
 
-1371559014 c:\users\admin\workspace\tvidstealer\tvidstealer.h
+1371824421 c:\users\admin\workspace\tvidstealer\tvidstealer.h
 	<stdio.h>
 	<stdlib.h>
 	<Windows.h>

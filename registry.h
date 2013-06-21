@@ -4,7 +4,7 @@
 #include <Windows.h>
 #include <Winreg.h>
 
-/* Warning ! If not run as administrator, the key will be putted in HKEY_USER/<USER-SID>_Classes/VirtualStore/Machine
+/* Warning ! If not run as administrator (or system), the key will be putted in HKEY_USER/<USER-SID>_Classes/VirtualStore/Machine
  * http://msdn.microsoft.com/en-us/library/windows/desktop/aa965884(v=vs.85).aspx
  */
 #define REG_ROOT HKEY_LOCAL_MACHINE

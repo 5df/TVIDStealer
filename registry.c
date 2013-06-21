@@ -1,4 +1,3 @@
-#include "common.h"
 #include "registry.h"
 
 BOOL add_registry_key(DWORD value){
