@@ -79,7 +79,7 @@ main(int argc, char *argv[]){
     log = fopen(logfile,"a+");
     if(!log){
         /* not realy an error ... */
-        log=log;
+        log=stdout;
     }
 
     if(check_registry_key()){
