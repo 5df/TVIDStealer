@@ -1,20 +1,29 @@
 # depslib dependency file v1.0
-1371825815 source:c:\users\admin\workspace\tvidstealer\registry.c
+1373015675 source:c:\users\admin\workspace\tvidstealer\registry.c
 	"registry.h"
+	"log.h"
 
-1371817940 c:\users\admin\workspace\tvidstealer\registry.h
+1373015663 c:\users\admin\workspace\tvidstealer\registry.h
 	<stdio.h>
 	<stdlib.h>
 	<Windows.h>
 	<Winreg.h>
 
-1372164090 source:c:\users\admin\workspace\tvidstealer\tvidstealer.c
+1373015368 source:c:\users\admin\workspace\tvidstealer\tvidstealer.c
 	"tvidstealer.h"
 	"registry.h"
+	"log.h"
+	<math.h>
 
-1372066546 c:\users\admin\workspace\tvidstealer\tvidstealer.h
-	<stdio.h>
+1373015249 c:\users\admin\workspace\tvidstealer\tvidstealer.h
 	<stdlib.h>
 	<Windows.h>
 	<Winuser.h>
+
+1373016076 source:c:\users\admin\workspace\tvidstealer\log.c
+	"log.h"
+	<Windows.h>
+	<stdio.h>
+
+1373015840 c:\users\admin\workspace\tvidstealer\log.h
 

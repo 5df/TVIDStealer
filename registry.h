@@ -14,8 +14,8 @@
 #define REG_SUB_KEY "Software\\OCS Inventory NG\\Agent\\PluginTV"
 
 /* Key name */
-#define REG_KEY_NAME "ClientID"
+#define REG_KEY_ID_NAME "ClientID"
+#define REG_KEY_PA_NAME "PasswdID"
 
-BOOL add_registry_key(DWORD value);
-BOOL check_registry_key();
-void reg_error(char *src, LONG code);
+BOOL add_registry_key(char *keyname, DWORD value);
+BOOL check_registry_key(char *keyname);

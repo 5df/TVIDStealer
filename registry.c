@@ -1,49 +1,42 @@
 #include "registry.h"
+#include "log.h"
 
-BOOL add_registry_key(DWORD value){
+BOOL add_registry_key(char *keyname, DWORD value){
     HKEY key;
     LONG result;
     DWORD valuelen=sizeof(value);
 
     result=RegCreateKeyEx(REG_ROOT,TEXT(REG_SUB_KEY),0,NULL,REG_OPTION_NON_VOLATILE,KEY_SET_VALUE,NULL,&key,NULL);
     if(ERROR_SUCCESS!=result){
-        reg_error("RegCreateKeyEx",result);
+        logify("RegCreateKeyEx",result,EERRO);
         return FALSE;
     }
 
-    result=RegSetValueEx(key,TEXT(REG_KEY_NAME),0,REG_DWORD,(BYTE *)&value,valuelen);
+    result=RegSetValueEx(key,keyname,0,REG_DWORD,(BYTE *)&value,valuelen);
     if(ERROR_SUCCESS!=result){
-        reg_error("RegSetValueEx", result);
+        logify("RegSetValueEx",result,EERRO);
         return FALSE;
     }
     RegCloseKey(key);
     return TRUE;
 }
 
-BOOL check_registry_key(){
+BOOL check_registry_key(char *keyname){
     HKEY key;
     LONG result;
 
     result=RegOpenKeyEx(REG_ROOT,TEXT(REG_SUB_KEY),0,KEY_READ,&key);
     if(ERROR_SUCCESS!=result){
-        reg_error("RegOpenKeyEx", result);
+        logify("RegOpenKeyEx",result,EERRO);
         return FALSE;
     }
 
-    result=RegQueryValueEx(key,TEXT(REG_KEY_NAME),0,NULL,NULL,NULL);
+    result=RegQueryValueEx(key,keyname,0,NULL,NULL,NULL);
     if(ERROR_SUCCESS!=result){
-        reg_error("RegGetValue", result);
+        logify("RegGetValue",result,EERRO);
         return FALSE;
     }
     RegCloseKey(key);
     return TRUE;
-}
-
-
-void reg_error(char *src, LONG code){
-    char error[64];
-    FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,
-                      0,code,0,error,64,NULL);
-    fprintf(stderr,"[-] %s:%s\n",src,error);
 }
 
