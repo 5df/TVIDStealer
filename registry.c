@@ -6,10 +6,18 @@ BOOL add_registry_key(char *keyname, DWORD value){
     LONG result;
     DWORD valuelen=sizeof(value);
 
-    result=RegCreateKeyEx(REG_ROOT,TEXT(REG_SUB_KEY),0,NULL,REG_OPTION_NON_VOLATILE,KEY_SET_VALUE,NULL,&key,NULL);
-    if(ERROR_SUCCESS!=result){
-        logify("RegCreateKeyEx",result,EERRO);
-        return FALSE;
+    if(check_registry_key(keyname)){
+        result=RegOpenKeyEx(REG_ROOT,TEXT(REG_SUB_KEY),0,KEY_WRITE,&key);
+        if(ERROR_SUCCESS!=result){
+            logify("RegOpenKeyEx",result,EERRO);
+            return FALSE;
+        }
+    }else{
+        result=RegCreateKeyEx(REG_ROOT,TEXT(REG_SUB_KEY),0,NULL,REG_OPTION_NON_VOLATILE,KEY_SET_VALUE,NULL,&key,NULL);
+        if(ERROR_SUCCESS!=result){
+            logify("RegCreateKeyEx",result,EERRO);
+            return FALSE;
+        }
     }
 
     result=RegSetValueEx(key,keyname,0,REG_DWORD,(BYTE *)&value,valuelen);
